@@ -21,5 +21,5 @@ To install these bash functions just add to your .bashrc the following lines:
 > done 
 >
 
-Now you have to logout and login and everytime you put a script in that "bin"
+You'll have to logout and login. Now everytime you put a script in that "bin"
 folder the scripts will be fired up when you login making all the functions they export available
