@@ -28,6 +28,19 @@
 
 # Permission granted for comercial use to: Rui Cabete <rui.cabete@gmail.com> (valid until 2015)
 
+
+# To use this program just put this script in a "bin" folder and add to your ~/.bashrc the
+# following lines (only one time!):
+# for file in /path/to/bin/folder/*.sh
+# do
+#     . $file
+# done 
+#
+# Then you'll need to logout and then login again. Now everytime you put a script in that "bin"
+# folder the script will be fired up when you login. Now you can do: 
+# $ findDependents -s pub.log:tracePipeline -l /opt/webmethods7/IntegrationServer
+
+
 find_deps(){
 
     show_disabled=$1
@@ -45,7 +58,7 @@ find_deps(){
 
 
 
-    string_pattern="<INVOKE .* SERVICE=\"$pattern\"";
+    string_pattern="<.*INVOKE.*SERVICE=\"$pattern\"";
 
 
     case $i_ext in 
@@ -53,7 +66,7 @@ find_deps(){
              echo "Searching in JAVA files not supported!"
              ;;
         xml)
-	     string_pattern_disabled="$string_pattern .*DISABLED=\"$show_disabled\".*>"
+	     string_pattern_disabled="$string_pattern.*DISABLED=\"$show_disabled\".*>"
 
 	     if grep -qi "$string_pattern_disabled" "$file"; then
 		print_FQDN "disabled: " $file
@@ -113,42 +126,49 @@ OPTIONS:
 EOF
 }
 
-SERVICE=
-LOCATION=
-SHOW_DISABLED="false"
 
-while getopts "hds:l:" OPTION
-do
-     case $OPTION in
-         h)
-             usage
-             exit 1
-             ;;
-         s)
-             SERVICE=$OPTARG
-             ;;
-         l)
-             LOCATION=$OPTARG
-             ;;
-         d)
-             SHOW_DISABLED="true"
-             ;;
+findDependents(){
+    SERVICE=
+    LOCATION=
+    SHOW_DISABLED="false"
 
-         ?)
-             usage
-             exit
-             ;;
-     esac
-done
+    while getopts "hds:l:" OPTION
+    do
+	case $OPTION in
+            h)
+		usage
+		exit 1
+		;;
+            s)
+		SERVICE=$OPTARG
+		;;
+            l)
+		LOCATION=$OPTARG
+		;;
+            d)
+		SHOW_DISABLED="true"
+		;;
+	    
+            ?)
+		usage
+		exit
+		;;
+	esac
+    done
+    
+    if [[ -z $LOCATION ]] || [[ -z $SERVICE ]]
+    then
+	usage
+	exit 1
+    fi
+    
+    
+    export -f find_deps print_FQDN
+    export SERVICE SHOW_DISABLED
+    
+    
+    find $LOCATION -type f -iname flow.xml -exec bash -c 'find_deps "$SHOW_DISABLED" "$SERVICE" "{}"' \;
 
-if [[ -z $LOCATION ]] || [[ -z $SERVICE ]]
-then
-     usage
-     exit 1
-fi
+}
 
-
-export -f find_deps print_FQDN
-export SERVICE SHOW_DISABLED
-
-find $LOCATION -type f -iname flow.xml -exec bash -c 'find_deps "$SHOW_DISABLED" "$SERVICE" "{}"' \;
+export -f findDependents
