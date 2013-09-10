@@ -13,8 +13,11 @@ script to flow (or at least to a java service)
 To install these bash functions just add to your .bashrc the following lines:
 
 > for file in /path/to/the/folder/where/you/put/the/files/*.sh
+
 > do
+
 >     . $file
+
 > done 
 >
 
