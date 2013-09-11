@@ -58,7 +58,7 @@ find_deps(){
 
 
 
-    string_pattern="<.*INVOKE.*SERVICE=\"$pattern\"";
+    service_pattern="SERVICE=\"$pattern\"";
 
 
     case $i_ext in 
@@ -66,18 +66,23 @@ find_deps(){
              echo "Searching in JAVA files not supported!"
              ;;
         xml)
-	     string_pattern_disabled="$string_pattern.*DISABLED=\"$show_disabled\".*>"
+	     disabled_pattern="DISABLED=\"$show_disabled\""
 
-	     if grep -qi "$string_pattern_disabled" "$file"; then
-		print_FQDN "disabled: " $file
+	     grep "$service_pattern" "$file" | grep -q "$disabled_pattern"
+             code=$?
+
+	     if [ "$code" == "0" ]; then
+		print_FQDN $disabled $file
 	     else
+		 #only when it's enabled because if the service is disabled then it needs to have the "disable" keyword
+		 #so it must match the first grep condition
 		 if [ $show_disabled == "false" ]; then 
 
 		     grep "$string_pattern" "$file" | grep -qvi "disabled"
 		     code=$?
 
-		     if [ "$code" == "0" ]; then
-			print_FQDN "enabled: " $file
+		     if [ "$code" == "0" ]; then 
+			print_FQDN $disabled $file
 		     fi
 		 fi
 
@@ -91,8 +96,16 @@ find_deps(){
 
 print_FQDN(){
 
-	message = $1;
+	disabled = $1;
 	file = $2;
+	
+	message=
+	if [ "$disabled" == "true" ]; then
+	    message = "disabled: "
+	else
+	    message = "enabled: "
+	fi;
+
 	
 	folder=$(dirname $file)
 	temp_var=${folder##*/ns/}
