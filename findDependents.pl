@@ -1,5 +1,10 @@
 #/usr/bin/perl
 
+# Author: David Santiago
+# This program is licensed under GPLv3 license
+#
+# purge Logs  Copyright (C) 2014  David Santiago
+
 use strict;
 use warnings;
 use utf8;
