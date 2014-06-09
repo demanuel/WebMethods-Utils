@@ -1,4 +1,4 @@
-#/usr/bin/perl
+#!/usr/bin/perl
 
 # Author: David Santiago
 # This program is licensed under GPLv3 license
@@ -13,7 +13,7 @@ my $lsof = '/usr/sbin/lsof';
 
 GetOptions("lsof=s"=>\$lsof,"dir=s"=>\$logs_dir);  
 
-@output = `$lsof *`;
+@output = `$lsof $logs_dir/*`;
 
 shift @output; #remove the headers of the lsof output
 foreach(@output){
@@ -33,6 +33,6 @@ closedir DIR;
 @logs = grep { !exists $hash{$_} } @logs;
 
 
-$command = 'nohup bzip2 '.join(' ', @logs).' &';
+$command = 'nohup bzip2 '.join(' ', map {"$logs_dir/$_"} @logs).' &';
 
 system($command);
