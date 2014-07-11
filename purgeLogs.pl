@@ -28,11 +28,13 @@ opendir(DIR, $logs_dir) || die "can't opendir $logs_dir: $!";
 @logs = grep { /\.log/ && !/\.gz/ && !/\.bz2/ } readdir(DIR);
 closedir DIR;
 
+@logs = map {"$logs_dir/$_"} @logs;
+
 @hash{@open_files}='1';
 
 @logs = grep { !exists $hash{$_} } @logs;
 
 
-$command = 'nohup bzip2 '.join(' ', map {"$logs_dir/$_"} @logs).' &';
+$command = 'nohup bzip2 '.join(' ',@logs ).' &';
 
 system($command);
